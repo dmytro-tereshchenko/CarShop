@@ -1,0 +1,23 @@
+﻿@model IEnumerable<string>
+<ul class="nav flex-lg-column flex-row">
+    <li class="nav-item">
+        <s1 class="nav-link text-secondary">@ViewBag.Header</s1>
+    </li>
+    <li class="nav-item">
+        @Html.ActionLink("All", "Index", @ViewBag.Control as string, null,
+        new { @class = "nav-link text-secondary" })
+    </li>
+    @foreach (string man in Model)
+    {
+        <li class="nav-item">
+            @Html.RouteLink(man,
+            new { controller = @ViewBag.Control as string, action = "Index", manufacturer = man, page = "1" },
+            new
+            {
+            @class = "nav-link text-secondary" +
+            (man == ViewBag.SelectedManufacturer ? " active" : "")
+            }
+            )
+        </li>
+    }
+</ul>

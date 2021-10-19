@@ -53,6 +53,20 @@ namespace CarShop
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
+                    name: null,
+                    pattern: "CarsPage/{page}",
+                    new { controller = "Cars", action = "Index", manufacturer = (string)null },
+                    new { page = @"\d+" });
+                endpoints.MapControllerRoute(
+                    name: null,
+                    pattern: "{manufacturer}",
+                    new { controller = "Cars", action = "Index", page = 1 });
+                endpoints.MapControllerRoute(
+                    name: null,
+                    pattern: "{manufacturer}/CarsPage{page}",
+                    new { controller = "Cars", action = "Index" },
+                    new { page = @"\d+" });
+                endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Cars}/{action=Index}/{id?}");
             });

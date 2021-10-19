@@ -11,17 +11,17 @@ namespace CarShop.Controllers
 {
     public class ManufacturersController : Controller
     {
-        private readonly CarShopContext _context;
+        private readonly CarShopContext context;
 
         public ManufacturersController(CarShopContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: Manufacturers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Manufactures.ToListAsync());
+            return View(await context.Manufactures.ToListAsync());
         }
 
         // GET: Manufacturers/Details/5
@@ -32,7 +32,7 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var manufacturer = await _context.Manufactures
+            var manufacturer = await context.Manufactures
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (manufacturer == null)
             {
@@ -57,8 +57,8 @@ namespace CarShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(manufacturer);
-                await _context.SaveChangesAsync();
+                context.Add(manufacturer);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(manufacturer);
@@ -72,7 +72,7 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var manufacturer = await _context.Manufactures.FindAsync(id);
+            var manufacturer = await context.Manufactures.FindAsync(id);
             if (manufacturer == null)
             {
                 return NotFound();
@@ -96,8 +96,8 @@ namespace CarShop.Controllers
             {
                 try
                 {
-                    _context.Update(manufacturer);
-                    await _context.SaveChangesAsync();
+                    context.Update(manufacturer);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -123,7 +123,7 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var manufacturer = await _context.Manufactures
+            var manufacturer = await context.Manufactures
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (manufacturer == null)
             {
@@ -138,15 +138,15 @@ namespace CarShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var manufacturer = await _context.Manufactures.FindAsync(id);
-            _context.Manufactures.Remove(manufacturer);
-            await _context.SaveChangesAsync();
+            var manufacturer = await context.Manufactures.FindAsync(id);
+            context.Manufactures.Remove(manufacturer);
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ManufacturerExists(int id)
         {
-            return _context.Manufactures.Any(e => e.Id == id);
+            return context.Manufactures.Any(e => e.Id == id);
         }
     }
 }

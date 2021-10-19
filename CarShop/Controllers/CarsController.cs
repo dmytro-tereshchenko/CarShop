@@ -11,18 +11,41 @@ namespace CarShop.Controllers
 {
     public class CarsController : Controller
     {
-        private readonly CarShopContext _context;
+        private readonly CarShopContext context;
 
         public CarsController(CarShopContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         // GET: Cars
-        public async Task<IActionResult> Index()
+        //public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string manufacturer, int page = 1)
         {
-            var carShopContext = _context.Cars.Include(c => c.Manufacturer);
-            return View(await carShopContext.ToListAsync());
+            int pageSize = 2;
+            IEnumerable<Car> carShopContext = await context.Cars.Include(c => c.Manufacturer).ToListAsync();
+            PageInfo pageInfo = new PageInfo
+            {
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalItems = manufacturer == null ? carShopContext.Count() :
+                carShopContext.Where(g => g.Manufacturer.Name == manufacturer).Count()
+
+            };
+            IEnumerable<Car> carsResult = manufacturer == null ? carShopContext.
+                OrderBy(g => g.Id).
+                Skip((page - 1) * pageSize).Take(pageSize)
+                : carShopContext.
+                Where(g => g.Manufacturer.Name == manufacturer).
+                OrderBy(g => g.Id).
+                Skip((page - 1) * pageSize).Take(pageSize);
+            IndexCarViewModel viewModel = new IndexCarViewModel
+            {
+                Cars = carsResult,
+                PageInfo = pageInfo,
+                SelectedManufacturer = manufacturer
+            };
+            return View(viewModel);
         }
 
         // GET: Cars/Details/5
@@ -33,7 +56,7 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var car = await _context.Cars
+            var car = await context.Cars
                 .Include(c => c.Manufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (car == null)
@@ -47,7 +70,7 @@ namespace CarShop.Controllers
         // GET: Cars/Create
         public IActionResult Create()
         {
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufactures, "Id", "Name");
+            ViewData["ManufacturerId"] = new SelectList(context.Manufactures, "Id", "Name");
             return View();
         }
 
@@ -60,11 +83,11 @@ namespace CarShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(car);
-                await _context.SaveChangesAsync();
+                context.Add(car);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufactures, "Id", "Name", car.ManufacturerId);
+            ViewData["ManufacturerId"] = new SelectList(context.Manufactures, "Id", "Name", car.ManufacturerId);
             return View(car);
         }
 
@@ -76,12 +99,12 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var car = await _context.Cars.FindAsync(id);
+            var car = await context.Cars.FindAsync(id);
             if (car == null)
             {
                 return NotFound();
             }
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufactures, "Id", "Name", car.ManufacturerId);
+            ViewData["ManufacturerId"] = new SelectList(context.Manufactures, "Id", "Name", car.ManufacturerId);
             return View(car);
         }
 
@@ -101,8 +124,8 @@ namespace CarShop.Controllers
             {
                 try
                 {
-                    _context.Update(car);
-                    await _context.SaveChangesAsync();
+                    context.Update(car);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,7 +140,7 @@ namespace CarShop.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ManufacturerId"] = new SelectList(_context.Manufactures, "Id", "Name", car.ManufacturerId);
+            ViewData["ManufacturerId"] = new SelectList(context.Manufactures, "Id", "Name", car.ManufacturerId);
             return View(car);
         }
 
@@ -129,7 +152,7 @@ namespace CarShop.Controllers
                 return NotFound();
             }
 
-            var car = await _context.Cars
+            var car = await context.Cars
                 .Include(c => c.Manufacturer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (car == null)
@@ -145,15 +168,15 @@ namespace CarShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var car = await _context.Cars.FindAsync(id);
-            _context.Cars.Remove(car);
-            await _context.SaveChangesAsync();
+            var car = await context.Cars.FindAsync(id);
+            context.Cars.Remove(car);
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CarExists(int id)
         {
-            return _context.Cars.Any(e => e.Id == id);
+            return context.Cars.Any(e => e.Id == id);
         }
     }
 }
