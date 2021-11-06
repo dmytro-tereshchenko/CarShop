@@ -4,60 +4,68 @@
     ViewData["Title"] = "Cars";
 }
 
-<h1>Cars</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Model)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Year)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Manufacturer)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Cars)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Model)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Year)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Manufacturer.Name)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-<br />
-@Html.PageLinks(Model.PageInfo, b => Url.Action("Index",
-new { page = b, manufacturer = Model.SelectedManufacturer }))
+<div class="row panel">
+    <div class="col-md-2">
+        @Html.RenderAction("Menu", "Nav", new { manufacturer = @Model.SelectedManufacturer })
+    </div>
+    <main role="main" class="pb-3 col-md-10">
+        <h1>Cars</h1>
+
+        <p>
+            <a asp-action="Create">Create New</a>
+        </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Model)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Year)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Price)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cars.FirstOrDefault().Manufacturer)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Cars)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Model)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Year)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Price)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Manufacturer.Name)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <br />
+        @Html.PageLinks(Model.PageInfo, b => Url.Action("Index",
+        new { page = b, manufacturer = Model.SelectedManufacturer }))
+    </main>
+</div>

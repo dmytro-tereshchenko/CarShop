@@ -1,10 +1,7 @@
-﻿using CarShop.Models;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading.Tasks;
+using CarShop.Domain;
 
 namespace CarShop.Controllers
 {
@@ -12,11 +9,11 @@ namespace CarShop.Controllers
     {
         private readonly CarShopContext context;
         public NavController(CarShopContext context) => this.context = context;
-        public PartialViewResult Menu(string control = "Cars", string category = null)
+        public PartialViewResult Menu(string manufacturer = null)
         {
             IEnumerable<Manufacturer> manufacturers = context.Manufactures.ToList();
-            ViewBag.Control = control;
             ViewBag.Header = "Manufacturers";
+            ViewBag.SelectedManufacturer = manufacturer;
             return PartialView(manufacturers.Select(c => c.Name));
         }
     }

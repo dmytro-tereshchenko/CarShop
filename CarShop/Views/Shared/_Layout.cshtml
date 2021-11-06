@@ -31,14 +31,7 @@
     </header>
 
     <div class="container">
-        <div class="row panel">
-            <div class="col-md-2">
-                @Html.RenderAction("Menu", "Nav")
-            </div>
-            <main role="main" class="pb-3 col-md-10">
-                @RenderBody()
-            </main>
-        </div>
+        @RenderBody()
     </div>
 
     <footer class="border-top footer text-muted">

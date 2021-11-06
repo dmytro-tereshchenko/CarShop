@@ -4,18 +4,17 @@
         <s1 class="nav-link text-secondary">@ViewBag.Header</s1>
     </li>
     <li class="nav-item">
-        @Html.ActionLink("All", "Index", @ViewBag.Control as string, null,
-        new { @class = "nav-link text-secondary" })
+        @Html.ActionLink("All", "Index", null, null,
+        new { @class = "nav-link text-secondary mx-auto" + (@ViewBag.SelectedManufacturer == (string)null ? " active" : "") })
     </li>
     @foreach (string man in Model)
     {
         <li class="nav-item">
             @Html.RouteLink(man,
-            new { controller = @ViewBag.Control as string, action = "Index", manufacturer = man, page = "1" },
+            new { action = "Index", manufacturer = man, page = "1" },
             new
             {
-            @class = "nav-link text-secondary" +
-            (man == ViewBag.SelectedManufacturer ? " active" : "")
+                @class = "nav-link text-secondary" + (@man == @ViewBag.SelectedManufacturer ? " active" : "")
             }
             )
         </li>
