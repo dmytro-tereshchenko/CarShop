@@ -50,6 +50,14 @@ namespace CarShop.WebApi.Controllers
             {
                 return BadRequest();
             }
+            if (car.Year < 1600 || car.Year > DateTime.Now.Year)
+            {
+                ModelState.AddModelError("Year", $"Year have to be between 1600 and {DateTime.Now.Year}");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (car.Manufacturer != null)
             {
                 car.ManufacturerId = car.Manufacturer.Id;
@@ -57,7 +65,8 @@ namespace CarShop.WebApi.Controllers
             }
             context.Cars.Add(car);
             await context.SaveChangesAsync();
-            return Ok(car);
+            Car response = await context.Cars.Include(context => context.Manufacturer).FirstAsync(c => c.Id == car.Id);
+            return Ok(response);
         }
 
         //api/car
@@ -70,6 +79,14 @@ namespace CarShop.WebApi.Controllers
             }
             if (!context.Cars.Any(c => c.Id == car.Id))
                 return NotFound();
+            if (car.Year < 1600 || car.Year > DateTime.Now.Year)
+            {
+                ModelState.AddModelError("Year", $"Year have to be between 1600 and {DateTime.Now.Year}");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (car.Manufacturer != null)
             {
                 car.ManufacturerId = car.Manufacturer.Id;
@@ -91,7 +108,8 @@ namespace CarShop.WebApi.Controllers
                     throw;
                 }
             }
-            return Ok(car);
+            Car response = await context.Cars.Include(context => context.Manufacturer).FirstAsync(c => c.Id == car.Id);
+            return Ok(response);
         }
         //api/car/2
         [HttpDelete("{id}")]

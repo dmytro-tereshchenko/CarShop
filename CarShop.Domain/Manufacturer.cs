@@ -10,9 +10,9 @@ namespace CarShop.Domain
     {
         [Key]
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Input manufacturer's name")]
         public string Name { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Input manufacturer's location")]
         public string Location { get; set; }
     }
 }

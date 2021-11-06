@@ -1,0 +1,323 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <form name="carForm">
+                <input type="hidden" name="id" value="0" />
+                <div id="errorModel" class="alert alert-danger" style="display:none;"></div>
+                <div class="mb-3">
+                    <label for="model" class="form-label">Model:</label>
+                    <input type="text" name="model" class="form-control" />
+                </div>
+                <div id="errorYear" class="alert alert-danger" style="display:none;"></div>
+                <div class="mb-3">
+                    <label for="year" class="form-label">Year:</label>
+                    <input type="number" name="year" class="form-control" />
+                </div>
+                <div id="errorDescription" class="alert alert-danger" style="display:none;"></div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <input type="text" name="description" class="form-control" />
+                </div>
+                <div id="errorPrice" class="alert alert-danger" style="display:none;"></div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price:</label>
+                    <input type="number" name="price" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="manufacturerId" class="form-label">Manufacturer:</label>
+                    <select name="manufacturerId" class="form-control"></select>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <input type="submit" value="Save" class="btn btn-sm btn-primary" />
+                        <a id="reset" class="btn btn-sm btn-warning">Clear</a>
+                    </div>
+                </div>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Model</th>
+                            <th>Year</th>
+                            <th>Description</th>
+                            <th>Price, $</th>
+                            <th>Manufacturer</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script>
+        async function GetManufacturers() {
+            const response = await fetch("api/manufacturer", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const manufacturers = await response.json();
+                const manufacturerSelect = document.forms["carForm"].elements["manufacturerId"];
+                var range = document.createRange();
+                range.selectNodeContents(manufacturerSelect);
+                range.deleteContents();
+                manufacturers.forEach(manufacturer => {
+                    manufacturerSelect.append(rowManufacturerSelect(manufacturer));
+                });
+            }
+        }
+        function rowManufacturerSelect(manufacturer) {
+            const option = document.createElement("option");
+            option.setAttribute("value", manufacturer.id);
+            option.innerText = manufacturer.name;
+            return option;
+        }
+        async function GetCars() {
+            const response = await fetch("api/car", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const cars = await response.json();
+                const tbody = document.querySelector("tbody");
+                cars.forEach(car => {
+                    tbody.append(row(car));
+                });
+            }
+        }
+
+        function row(car) {
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-rowid", car.id);
+            const idTd = document.createElement("td");
+            idTd.append(car.id);
+            tr.append(idTd);
+            const modelTd = document.createElement("td");
+            modelTd.append(car.model);
+            tr.append(modelTd);
+            const yearTd = document.createElement("td");
+            yearTd.append(car.year);
+            tr.append(yearTd);
+            const descriptionTd = document.createElement("td");
+            descriptionTd.append(car.description);
+            tr.append(descriptionTd);
+            const priceTd = document.createElement("td");
+            priceTd.append(car.price);
+            tr.append(priceTd);
+            const manufacturerTd = document.createElement("td");
+            manufacturerTd.append(car.manufacturer.name);
+            tr.append(manufacturerTd);
+            const linksTd = document.createElement("td");
+            const editBtn = document.createElement("a");
+            editBtn.setAttribute("data-id", car.id);
+            editBtn.setAttribute("style", "cursor: pointer; padding: 15px");
+            editBtn.append("Edit");
+            editBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                const editedCar = await GetCar(car.id);
+                const carForm = document.forms["carForm"];
+                carForm.elements["id"].value = editedCar.id;
+                carForm.elements["model"].value = editedCar.model;
+                carForm.elements["year"].value = editedCar.year;
+                carForm.elements["description"].value = editedCar.description;
+                carForm.elements["price"].value = editedCar.price;
+                await GetManufacturers();
+                let manufacturers = document.querySelectorAll("select>option");
+                manufacturers.forEach(async (man) => {
+                    if (man.value == car.manufacturerId) {
+                        man.setAttribute('selected', true);
+                    }
+                });
+            });
+            linksTd.append(editBtn);
+            linksTd.append("|");
+            const deleteBtn = document.createElement("a");
+            deleteBtn.setAttribute("data-id", car.id);
+            deleteBtn.append("Delete");
+            deleteBtn.setAttribute("style", "cursor: pointer; padding: 15px");
+            deleteBtn.addEventListener("click", async e => {
+                e.preventDefault();
+                await DeleteCar(car.id);
+            });
+            linksTd.append(deleteBtn);
+            tr.append(linksTd);
+            return tr;
+        }
+
+        async function GetCar(id) {
+            const response = await fetch("api/car/" + id, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const car = await response.json();
+                return car;
+            }
+        }
+        async function DeleteCar(id) {
+            const response = await fetch("api/car/" + id, {
+                method: "DELETE"
+            });
+            if (response.ok === true) {
+                document.querySelector(`tr[data-rowid="${id}"]`).remove();
+            }
+        }
+        function AddError(target, errors) {
+            errors.forEach
+                (error => {
+                    let p = document.createElement("p");
+                    p.innerHTML = error;
+                    target.appendChild(p);
+                });
+        }
+        function ClearErrors() {
+            let blockErrors = document.getElementsByClassName("alert alert-danger");
+            for (let block of blockErrors) {
+                var range = document.createRange();
+                range.selectNodeContents(block);
+                range.deleteContents();
+                block.style.display = "none";
+            };
+        }
+        function ShowErrors(errorData) {
+            console.log(errorData);
+            if (errorData) {
+                if (errorData.errors) {
+                    if (errorData.errors["Model"]) {
+                        let block = document.getElementById("errorModel");
+                        AddError(block, errorData.errors["Model"]);
+                        block.style.display = "block";
+                    };
+                    if (errorData.errors["Year"]) {
+                        let block = document.getElementById("errorYear");
+                        AddError(block, errorData.errors["Year"]);
+                        block.style.display = "block";
+                    };
+                    if (errorData.errors["Description"]) {
+                        let block = document.getElementById("errorDescription");
+                        AddError(block, errorData.errors["Description"]);
+                        block.style.display = "block";
+                    };
+                    if (errorData.errors["Price"]) {
+                        let block = document.getElementById("errorPrice");
+                        AddError(block, errorData.errors["Price"]);
+                        block.style.display = "block";
+                    };
+                };
+                if (errorData["Year"]) {
+                    let block = document.getElementById("errorYear");
+                    AddError(block, errorData["Year"]);
+                    block.style.display = "block";
+                };
+            }
+        }
+        async function EditCar(carId, carModel, carYear, carDescription, carPrice, carManufacturerId) {
+            let yearCar = parseInt(carYear);
+            if (isNaN(yearCar)) {
+                yearCar = 0;
+            }
+            let priceCar = parseInt(carPrice);
+            if (isNaN(priceCar)) {
+                priceCar = -1;
+            }
+            const response = await fetch("api/car", {
+                method: "PUT",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: parseInt(carId),
+                    model: carModel,
+                    year: yearCar,
+                    description: carDescription,
+                    price: priceCar,
+                    manufacturerId: parseInt(carManufacturerId)
+                })
+            });
+            ClearErrors();
+            if (response.ok === true) {
+                const car = await response.json();
+                document.querySelector(`tr[data-rowid="${car.id}"]`).replaceWith(row(car));
+                Reset();
+            }
+            else {
+                    ShowErrors(await response.json());
+                }
+        }
+
+        async function AddCar(carModel, carYear, carDescription, carPrice, carManufacturerId) {
+            let yearCar = parseInt(carYear);
+            if (isNaN(yearCar)) {
+                yearCar = 0;
+            }
+            let priceCar = parseInt(carPrice);
+            if (isNaN(priceCar)) {
+                priceCar = -1;
+            }
+            console.log(yearCar);
+            const response = await fetch("api/car", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: carModel,
+                    year: yearCar,
+                    description: carDescription,
+                    price: priceCar,
+                    manufacturerId: parseInt(carManufacturerId)
+                })
+            });
+            ClearErrors();
+            if (response.ok === true) {
+                const car = await response.json();
+                document.querySelector("tbody").append(row(car));
+                Reset();
+            }
+            else {
+                    ShowErrors(await response.json());
+                }
+        }
+        function Reset() {
+            const form = document.forms["carForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        }
+        document.addEventListener("DOMContentLoaded", async () => {
+            await GetCars();
+            await GetManufacturers();
+        });
+        const delBtn = document.getElementById("reset");
+        delBtn.addEventListener("click", e => {
+            e.preventDefault();
+            Reset();
+        });
+        let carForm = document.forms["carForm"];
+        carForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            let editedId = carForm.elements["id"].value;
+            let model = carForm.elements["model"].value;
+            let year = carForm.elements["year"].value;
+            let description = carForm.elements["description"].value;
+            let price = carForm.elements["price"].value;
+            let manufacturerId = carForm.elements["manufacturerId"].value;
+            if (editedId == 0) {
+                await AddCar(model, year, description, price, manufacturerId);
+            }
+            else
+                await EditCar(editedId, model, year, description, price, manufacturerId);
+        });
+    </script>
+</body>
+</html>
